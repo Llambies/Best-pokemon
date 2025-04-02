@@ -1,0 +1,15 @@
+{
+  "name": "best-pokemon",
+  "version": "1.0.0",
+  "description": "Juego para crear el mejor Pokémon combinando estadísticas",
+  "main": "game.js",
+  "scripts": {
+    "build": "webpack --mode production",
+    "dev": "webpack serve --mode development"
+  },
+  "dependencies": {
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  }
+} 

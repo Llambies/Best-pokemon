@@ -3,75 +3,56 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mejor Pokémon - Creador de Pokémon Imaginario</title>
+    <title>Mejor Pokémon</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="container">
-      <h1>¡Crea tu Pokémon Imaginario!</h1>
-
-     
-      <div class="controls">
-        <button id="reload-data" class="reload-button">Recargar Datos</button>
-      </div>  
+      <h1>Mejor Pokémon</h1>
 
       <div class="game-container">
         <div class="round-info">
-          <h2>Ronda <span id="round-number">1</span>/6</h2>
+          <h2>Ronda <span id="round-number">1</span></h2>
         </div>
 
         <div class="pokemon-section">
           <h3>Pokémon Disponibles</h3>
-          <div class="pokemon-grid" id="pokemon-list">
-            <!-- Los Pokémon se cargarán aquí dinámicamente -->
-          </div>
+          <div id="pokemon-list" class="pokemon-grid"></div>
         </div>
 
         <div class="imaginary-pokemon">
           <h3>Tu Pokémon Imaginario</h3>
-          <div class="stats-display" id="imaginary-stats">
-            <!-- Las estadísticas seleccionadas se mostrarán aquí -->
+          <div id="imaginary-stats"></div>
+          <div class="total-stats">
+            Total: <span id="total-stats">0</span>
           </div>
-          <div class="total-stats">Total: <span id="total-stats">0</span></div>
         </div>
-
-        <button id="select-button" class="select-button" disabled>
-          Seleccionar
-        </button>
       </div>
 
-      <div class="history-section">
-        <h2>Historial de Pokémon Imaginarios</h2>
-        <div class="history-grid" id="history-list">
-          <!-- El historial se cargará aquí dinámicamente -->
-        </div>
+      <div class="controls">
+        <button id="reload-button" class="reload-button">Reiniciar Juego</button>
       </div>
     </div>
 
-    <!-- Modal de resultados -->
+    <!-- Modal de Resultados -->
     <div id="results-modal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
-          <h2>¡Pokémon Imaginario Creado!</h2>
+          <h2>¡Juego Terminado!</h2>
           <button class="close-modal">&times;</button>
         </div>
         <div class="modal-body">
           <div class="modal-pokemon-info">
-            <div id="modal-sprite" class="modal-sprite"></div>
-            <div id="modal-stats" class="modal-stats"></div>
-          </div>
-          <div class="modal-total">
-            Total de estadísticas: <span id="modal-total">0</span>
+            <div class="modal-sprite"></div>
+            <div class="modal-stats"></div>
           </div>
         </div>
         <div class="modal-footer">
-          <button class="modal-button" id="continue-button">
-            Crear Nuevo Pokémon
-          </button>
+          <button class="modal-button" id="play-again">Jugar de Nuevo</button>
         </div>
       </div>
     </div>
 
-    <script src="game.js"></script>
+    <script src="dist/bundle.js"></script>
   </body>
 </html>
