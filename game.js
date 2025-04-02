@@ -36,12 +36,10 @@ class PokemonGame {
     this.statsListElement = document.getElementById("stats-list");
     this.imaginaryStatsElement = document.getElementById("imaginary-stats");
     this.totalStatsElement = document.getElementById("total-stats");
-    this.selectButton = document.getElementById("select-button");
     this.reloadButton = document.getElementById("reload-data");
     this.historyListElement = document.getElementById("history-list");
 
     // Event listeners
-    this.selectButton.addEventListener("click", () => this.makeSelection());
     this.reloadButton.addEventListener("click", () => this.reloadPokemonData());
 
     // Cargar historial desde localStorage
@@ -622,10 +620,10 @@ class PokemonGame {
                 <h3>Tu Pokémon</h3>
                 <div class="stats-container">
                     ${statOrder.map(stat => {
-                        const value = this.imaginaryPokemon.stats[stat];
-                        const percentage = (value / 255) * 100;
-                        const source = this.imaginaryPokemon.sources && this.imaginaryPokemon.sources[stat];
-                        return `
+      const value = this.imaginaryPokemon.stats[stat];
+      const percentage = (value / 255) * 100;
+      const source = this.imaginaryPokemon.sources && this.imaginaryPokemon.sources[stat];
+      return `
                             <div class="stat-bar">
                                 <div class="stat-name">
                                     ${this.statNames[stat]}
@@ -641,7 +639,7 @@ class PokemonGame {
                                 </div>
                             </div>
                         `;
-                    }).join("")}
+    }).join("")}
                     <div class="total-value">Total: ${Object.values(this.imaginaryPokemon.stats).reduce((sum, value) => sum + value, 0)}</div>
                 </div>
             </div>
@@ -649,10 +647,10 @@ class PokemonGame {
                 <h3>Mejor Posible</h3>
                 <div class="stats-container">
                     ${statOrder.map(stat => {
-                        const value = bestPossible.stats[stat];
-                        const percentage = (value / 255) * 100;
-                        const source = bestPossible.sources[stat];
-                        return `
+      const value = bestPossible.stats[stat];
+      const percentage = (value / 255) * 100;
+      const source = bestPossible.sources[stat];
+      return `
                             <div class="stat-bar">
                                 <div class="stat-name">
                                     ${this.statNames[stat]}
@@ -668,7 +666,7 @@ class PokemonGame {
                                 </div>
                             </div>
                         `;
-                    }).join("")}
+    }).join("")}
                     <div class="total-value">Total: ${bestPossible.total}</div>
                 </div>
             </div>
@@ -819,7 +817,7 @@ class PokemonGame {
   }
 }
 
-// Iniciar el juego cuando se carga la página
-window.addEventListener("load", () => {
-  new PokemonGame();
+// Inicializar el juego cuando el DOM esté cargado
+document.addEventListener("DOMContentLoaded", () => {
+  const game = new PokemonGame();
 });
