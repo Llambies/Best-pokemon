@@ -60,64 +60,69 @@ class PokemonGame {
   async loadPokemonData() {
     try {
       // Intentar cargar desde localStorage primero
-      const savedData = localStorage.getItem("pokemonData");
-      if (savedData) {
-        this.pokemonData = JSON.parse(savedData);
+      const cachedData = localStorage.getItem("pokemonData");
+      if (cachedData) {
+        console.log("Cargando datos de Pokémon desde caché...");
+        this.pokemonData = JSON.parse(cachedData);
         this.startNewRound();
         return;
       }
 
-      await this.fetchPokemonData();
-    } catch (error) {
-      console.error("Error al cargar los datos:", error);
-      alert("Error al cargar los datos. Por favor, recarga la página.");
-    }
-  }
-
-  async fetchPokemonData() {
-    this.reloadButton.disabled = true;
-    this.reloadButton.textContent = "Cargando...";
-
-    try {
-      console.log("Cargando datos desde la API...");
+      console.log("Cargando datos de Pokémon desde la API...");
       const response = await fetch(
-        "https://pokeapi.co/api/v2/pokemon?limit=10000"
+        "https://pokeapi.co/api/v2/pokemon?limit=151"
       );
       const data = await response.json();
 
-      this.pokemonData = {};
-      for (const pokemon of data.results) {
-        try {
-          const details = await fetch(pokemon.url).then((res) => res.json());
-          const stats = {};
-          details.stats.forEach((stat) => {
-            stats[stat.stat.name] = stat.base_stat;
-          });
-          this.pokemonData[pokemon.name] = {
-            stats: stats,
-            sprite: details.sprites.front_default,
-          };
-          console.log(this.pokemonData[pokemon.name]);
-        } catch (error) {
-          console.error(`Error al cargar ${pokemon.name}:`, error);
-        }
-      }
+      // Cargar datos detallados de cada Pokémon
+      const pokemonPromises = data.results.map(async (pokemon) => {
+        const response = await fetch(pokemon.url);
+        const pokemonData = await response.json();
+        return {
+          name: pokemonData.name,
+          sprite: pokemonData.sprites.front_default,
+          stats: pokemonData.stats.reduce((acc, stat) => {
+            acc[stat.stat.name] = stat.base_stat;
+            return acc;
+          }, {}),
+        };
+      });
 
-      // Verificar que tenemos datos válidos
-      if (Object.keys(this.pokemonData).length === 0) {
-        throw new Error("No se pudieron cargar datos de Pokémon");
-      }
+      const pokemonDetails = await Promise.all(pokemonPromises);
+      this.pokemonData = pokemonDetails.reduce((acc, pokemon) => {
+        acc[pokemon.name] = pokemon;
+        return acc;
+      }, {});
 
       // Guardar en localStorage
-      localStorage.setItem("pokemonData", JSON.stringify(this.pokemonData));
+      try {
+        localStorage.setItem(
+          "pokemonData",
+          JSON.stringify(this.pokemonData)
+        );
+        console.log("Datos de Pokémon guardados en caché");
+      } catch (error) {
+        console.error("Error al guardar en localStorage:", error);
+      }
 
       this.startNewRound();
     } catch (error) {
-      console.error("Error al cargar los datos:", error);
-      alert("Error al cargar los datos. Por favor, intenta nuevamente.");
-    } finally {
-      this.reloadButton.disabled = false;
-      this.reloadButton.textContent = "Recargar Datos";
+      console.error("Error al cargar datos de Pokémon:", error);
+      // Mostrar mensaje de error al usuario
+      const errorMessage = document.createElement('div');
+      errorMessage.className = 'error-message';
+      errorMessage.innerHTML = `
+        <h3>Error al cargar los datos</h3>
+        <p>No se pudieron cargar los datos de Pokémon. Por favor, recarga la página o intenta más tarde.</p>
+        <button id="retry-load">Reintentar</button>
+      `;
+      document.querySelector('.game-container').prepend(errorMessage);
+      
+      // Añadir evento al botón de reintentar
+      document.getElementById('retry-load').addEventListener('click', () => {
+        errorMessage.remove();
+        this.loadPokemonData();
+      });
     }
   }
 

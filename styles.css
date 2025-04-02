@@ -833,3 +833,35 @@ h3 {
     gap: 20px;
   }
 }
+
+.error-message {
+  background: rgba(255, 0, 0, 0.1);
+  border: 2px solid rgba(255, 0, 0, 0.3);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #ff6b6b;
+}
+
+.error-message h3 {
+  color: #ff6b6b;
+  margin-top: 0;
+}
+
+.error-message button {
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 10px;
+  transition: all 0.3s ease;
+}
+
+.error-message button:hover {
+  background: #ff5252;
+  transform: translateY(-2px);
+}
