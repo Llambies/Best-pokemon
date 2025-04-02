@@ -36,11 +36,11 @@ class PokemonGame {
     this.statsListElement = document.getElementById("stats-list");
     this.imaginaryStatsElement = document.getElementById("imaginary-stats");
     this.totalStatsElement = document.getElementById("total-stats");
-    this.reloadButton = document.getElementById("reload-data");
+    this.reloadButton = document.getElementById("reload-button");
     this.historyListElement = document.getElementById("history-list");
 
     // Event listeners
-    this.reloadButton.addEventListener("click", () => this.reloadPokemonData());
+    //this.reloadButton.addEventListener("click", () => this.reloadPokemonData());
 
     // Cargar historial desde localStorage
     const savedHistory = localStorage.getItem("pokemonHistory");
