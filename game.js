@@ -2,6 +2,9 @@ class PokemonGame {
   constructor() {
     this.pokemonData = null;
     this.selectedStats = new Set();
+    this.selectedAbilities = new Set();
+    this.selectedTypes = new Set();
+    this.tiposSeleccionados = 0;
     this.availableStats = [
       "hp",
       "attack",
@@ -18,12 +21,35 @@ class PokemonGame {
       "special-defense": "SPD",
       speed: "SPE",
     };
+    this.typeNames = {
+      normal: "Normal",
+      fire: "Fuego",
+      water: "Agua",
+      electric: "Eléctrico",
+      grass: "Planta",
+      ice: "Hielo",
+      fighting: "Lucha",
+      poison: "Veneno",
+      ground: "Tierra",
+      flying: "Volador",
+      psychic: "Psíquico",
+      bug: "Bicho",
+      rock: "Roca",
+      ghost: "Fantasma",
+      dragon: "Dragón",
+      dark: "Siniestro",
+      steel: "Acero",
+      fairy: "Hada"
+    };
     this.currentPokemon = null;
     this.imaginaryPokemon = {
       name: "Pokémon Imaginario",
       stats: {},
       sprites: {},
       currentSprite: null,
+      abilities: [],
+      types: [],
+      sources: {}
     };
     this.selectedPokemonElement = null;
     this.selectedStatElement = null;
@@ -39,7 +65,8 @@ class PokemonGame {
     this.reloadButton = document.getElementById("reload-button");
     this.historyListElement = document.getElementById("history-list");
 
-
+    // Event listeners
+    this.reloadButton.addEventListener("click", () => this.reloadPokemonData());
 
     // Cargar historial desde localStorage
     const savedHistory = localStorage.getItem("pokemonHistory");
@@ -56,11 +83,18 @@ class PokemonGame {
 
   async loadPokemonData() {
     try {
-      // Intentar cargar desde localStorage primero
       const cachedData = localStorage.getItem("pokemonData");
       if (cachedData) {
         console.log("Cargando datos de Pokémon desde caché...");
         this.pokemonData = JSON.parse(cachedData);
+        this.startNewRound();
+        return;
+      }
+
+      // Intentar cargar desde pokemon_data.json primero
+      const jsonData = JSON.parse(localStorage.getItem("pokemonData"));
+      if (jsonData) {
+        this.pokemonData = jsonData;
         this.startNewRound();
         return;
       }
@@ -82,6 +116,14 @@ class PokemonGame {
             acc[stat.stat.name] = stat.base_stat;
             return acc;
           }, {}),
+          abilities: pokemonData.abilities.map(ability => ({
+            name: ability.ability.name,
+            is_hidden: ability.is_hidden
+          })),
+          types: pokemonData.types.map(type => ({
+            name: type.type.name,
+            slot: type.slot
+          }))
         };
       });
 
@@ -100,6 +142,14 @@ class PokemonGame {
         console.log("Datos de Pokémon guardados en caché");
       } catch (error) {
         console.error("Error al guardar en localStorage:", error);
+      }
+
+      // Guardar en pokemon_data.json
+      try {
+        localStorage.setItem("pokemonData", JSON.stringify(this.pokemonData));
+        console.log("Datos de Pokémon guardados en pokemon_data.json");
+      } catch (error) {
+        console.error("Error al guardar en pokemon_data.json:", error);
       }
 
       this.startNewRound();
@@ -131,11 +181,8 @@ class PokemonGame {
     ) {
       // Limpiar localStorage
       localStorage.removeItem("pokemonData");
-      localStorage.removeItem("pokemonHistory");
 
       // Reiniciar el juego
-      this.pokemonHistory = [];
-      this.updateHistoryDisplay();
       this.resetGame();
 
       // Cargar nuevos datos
@@ -151,8 +198,11 @@ class PokemonGame {
     }
 
     // Verificar si el juego debería terminar
-    if (this.selectedStats.size === 6) {
+    if (this.selectedStats.size === 6 && this.selectedAbilities.size === 1 && this.tiposSeleccionados === 2) {
       console.log("Se alcanzaron las 6 estadísticas en startNewRound");
+      console.log(this.selectedStats);
+      console.log(this.selectedAbilities);
+      console.log(this.selectedTypes);
       this.showFinalResults();
       return;
     }
@@ -169,6 +219,8 @@ class PokemonGame {
       name: name,
       stats: this.pokemonData[name].stats,
       sprite: this.pokemonData[name].sprite,
+      abilities: this.pokemonData[name].abilities || [],
+      types: this.pokemonData[name].types || []
     }));
 
     // Añadir los Pokémon de esta ronda al registro
@@ -186,6 +238,26 @@ class PokemonGame {
 
     // Actualizar número de ronda
     this.roundNumberElement.textContent = this.selectedStats.size + 1;
+
+    // Si ya hay una habilidad seleccionada, deshabilitar todas las habilidades en las nuevas tarjetas
+    if (this.selectedAbilities.size > 0) {
+      document.querySelectorAll('.ability').forEach(el => {
+        el.style.pointerEvents = 'none';
+        if (!el.classList.contains('selected')) {
+          el.style.opacity = '0.5';
+        }
+      });
+    }
+
+    // Si ya hay dos tipos seleccionados, deshabilitar todos los tipos
+    if (this.tiposSeleccionados >= 2) {
+      document.querySelectorAll('.type').forEach(el => {
+        el.style.pointerEvents = 'none';
+        if (!el.classList.contains('selected')) {
+          el.style.opacity = '0.5';
+        }
+      });
+    }
   }
 
   createPokemonCard(pokemon) {
@@ -214,6 +286,109 @@ class PokemonGame {
     const nameElement = document.createElement("div");
     nameElement.className = "pokemon-name";
     nameElement.textContent = this.capitalize(pokemon.name);
+
+    // Contenedor de tipos
+    const typesContainer = document.createElement("div");
+    typesContainer.className = "pokemon-types";
+    typesContainer.innerHTML = `
+      <h4>Tipos:</h4>
+      ${pokemon.types.map(type => `
+        <div class="type ${this.selectedTypes.has(type.name) ? 'selected' : ''}" data-type="${type.name}">
+          ${this.typeNames[type.name] || this.capitalize(type.name)}
+        </div>
+      `).join('')}
+    `;
+
+    // Añadir eventos de clic a los tipos
+    typesContainer.querySelectorAll('.type').forEach(typeElement => {
+      typeElement.addEventListener('click', () => {
+        const typeName = typeElement.dataset.type;
+
+        // Si ya tenemos 2 tipos seleccionados, no permitir más selecciones
+        if (this.tiposSeleccionados >= 2) {
+          return;
+        }
+
+        // Añadir el tipo seleccionado
+
+        if (!this.selectedTypes.has(typeName)) {
+          typeElement.classList.add('selected');
+          this.selectedTypes.add(typeName);
+
+          // Actualizar el Pokémon imaginario
+          this.imaginaryPokemon.types.push({
+            name: typeName,
+            slot: pokemon.types.find(t => t.name === typeName).slot
+          });
+        }
+        this.tiposSeleccionados++;
+
+        // Actualizar la interfaz
+        this.updateImaginaryPokemon();
+
+        // Si ya tenemos 2 tipos seleccionados, deshabilitar todos los tipos
+        if (this.tiposSeleccionados === 2) {
+          document.querySelectorAll('.type').forEach(el => {
+            el.style.pointerEvents = 'none';
+            if (!el.classList.contains('selected')) {
+              el.style.opacity = '0.5';
+            }
+          });
+        }
+
+        // Iniciar nueva ronda
+        console.log("Iniciando nueva ronda después de seleccionar tipo...");
+        this.startNewRound();
+      });
+    });
+
+    // Contenedor de habilidades
+    const abilitiesContainer = document.createElement("div");
+    abilitiesContainer.className = "pokemon-abilities";
+    abilitiesContainer.innerHTML = `
+      <h4>Habilidades:</h4>
+      ${pokemon.abilities.map(ability => `
+        <div class="ability ${this.selectedAbilities.has(ability.name) ? 'selected' : ''}" data-ability="${ability.name}">
+          ${this.capitalize(ability.name)}
+        </div>
+      `).join('')}
+    `;
+
+    // Añadir eventos de clic a las habilidades
+    abilitiesContainer.querySelectorAll('.ability').forEach(abilityElement => {
+      abilityElement.addEventListener('click', () => {
+        const abilityName = abilityElement.dataset.ability;
+        if (!this.selectedAbilities.has(abilityName)) {
+          // Deseleccionar todas las habilidades
+          document.querySelectorAll('.ability').forEach(el => el.classList.remove('selected'));
+          // Seleccionar la nueva habilidad
+          abilityElement.classList.add('selected');
+          this.selectedAbilities.clear();
+          this.selectedAbilities.add(abilityName);
+
+          // Actualizar el Pokémon imaginario
+          this.imaginaryPokemon.abilities = [{
+            name: abilityName,
+            is_hidden: pokemon.abilities.find(a => a.name === abilityName).is_hidden
+          }];
+
+          // Actualizar la interfaz
+          this.updateImaginaryPokemon();
+
+          // Deshabilitar todas las habilidades
+          document.querySelectorAll('.ability').forEach(el => {
+            el.style.pointerEvents = 'none';
+            if (!el.classList.contains('selected')) {
+              el.style.opacity = '0.5';
+            }
+          });
+
+          // Iniciar nueva ronda
+          console.log("Iniciando nueva ronda después de seleccionar habilidad...");
+          this.startNewRound();
+        }
+      });
+    });
 
     // Contenedor de estadísticas
     const statsContainer = document.createElement("div");
@@ -259,6 +434,7 @@ class PokemonGame {
           this.imaginaryPokemon.stats[stat] = value;
           this.imaginaryPokemon.sprites[stat] = pokemon.sprite;
           this.imaginaryPokemon.currentSprite = pokemon.sprite;
+
           // Guardar la información de la ronda
           this.imaginaryPokemon.sources = this.imaginaryPokemon.sources || {};
           this.imaginaryPokemon.sources[stat] = {
@@ -288,7 +464,7 @@ class PokemonGame {
           });
 
           // Si el juego ha terminado
-          if (this.selectedStats.size === 6) {
+          if (this.selectedStats.size === 6 && this.selectedAbilities.size === 1 && this.tiposSeleccionados >= 2) {
             console.log("¡Juego terminado! Mostrando resultados finales...");
             // Desactivar todas las barras de estadísticas
             document.querySelectorAll(".stat-bar").forEach((bar) => {
@@ -313,6 +489,8 @@ class PokemonGame {
 
     // Ensamblar la tarjeta
     infoContainer.appendChild(nameElement);
+    infoContainer.appendChild(typesContainer);
+    infoContainer.appendChild(abilitiesContainer);
     infoContainer.appendChild(statsContainer);
     card.appendChild(spriteContainer);
     card.appendChild(infoContainer);
@@ -397,8 +575,25 @@ class PokemonGame {
             `
         : ""
       }
-            <div class="imaginary-stats">
-                ${Object.entries(this.imaginaryPokemon.stats)
+            <div class="imaginary-info">
+                <div class="imaginary-abilities">
+                    <h4>Habilidades:</h4>
+                    ${this.imaginaryPokemon.abilities.map(ability => `
+                        <div class="ability">
+                            ${this.capitalize(ability.name)}
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="imaginary-types">
+                    <h4>Tipos:</h4>
+                    ${this.imaginaryPokemon.types.map(type => `
+                        <div class="type" data-type="${type.name}">
+                            ${this.typeNames[type.name] || this.capitalize(type.name)}
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="imaginary-stats">
+                    ${Object.entries(this.imaginaryPokemon.stats)
         .map(([stat, value]) => {
           const percentage = (value / 255) * 100;
           const hue = percentage * 1.2;
@@ -413,6 +608,7 @@ class PokemonGame {
                         `;
         })
         .join("")}
+                </div>
             </div>
         </div>
         ${Object.keys(this.imaginaryPokemon.stats).length > 0
@@ -452,8 +648,6 @@ class PokemonGame {
     // Crear una lista de todas las posibilidades para cada estadística
     let statPossibilities = [];
     let bestSourcePossibilities = [];
-
-    console.log(this.shownPokemon);
 
     this.shownPokemon.forEach((round, roundIndex) => {
       statPossibilities[roundIndex] = [0, 0, 0, 0, 0, 0];
@@ -561,7 +755,6 @@ class PokemonGame {
       }
     }
 
-    console.log(combinations.sort((a, b) => b.total - a.total)[0]);
     return combinations.sort((a, b) => b.total - a.total)[0];
   }
 
@@ -590,6 +783,9 @@ class PokemonGame {
       stats: { ...this.imaginaryPokemon.stats },
       sprites: { ...this.imaginaryPokemon.sprites },
       currentSprite: this.imaginaryPokemon.currentSprite,
+      abilities: [...this.imaginaryPokemon.abilities],
+      types: [...this.imaginaryPokemon.types],
+      sources: { ...this.imaginaryPokemon.sources },
       total: userTotal,
       date: new Date().toLocaleString(),
     };
@@ -618,6 +814,16 @@ class PokemonGame {
             <div class="user-results">
                 <h3>Tu Pokémon</h3>
                 <div class="stats-container">
+                    ${this.imaginaryPokemon.types.length > 0 ? `
+                        <div class="types-section">
+                            <h4>Tipos:</h4>
+                            ${this.imaginaryPokemon.types.map(type => `
+                                <div class="type" data-type="${type.name}">
+                                    ${this.typeNames[type.name] || this.capitalize(type.name)}
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
                     ${statOrder.map(stat => {
       const value = this.imaginaryPokemon.stats[stat];
       const percentage = (value / 255) * 100;
@@ -715,6 +921,9 @@ class PokemonGame {
   resetGame() {
     // Limpiar selecciones
     this.selectedStats.clear();
+    this.selectedAbilities.clear();
+    this.selectedTypes.clear();
+    this.tiposSeleccionados = 0;
     this.availableStats = [
       "hp",
       "attack",
@@ -730,6 +939,9 @@ class PokemonGame {
       stats: {},
       sprites: {},
       currentSprite: null,
+      abilities: [],
+      types: [],
+      sources: {}
     };
 
     // Limpiar elementos del DOM
@@ -737,6 +949,13 @@ class PokemonGame {
     this.imaginaryStatsElement.innerHTML = "";
     this.totalStatsElement.textContent = "0";
     this.roundNumberElement.textContent = "1";
+
+    // Habilitar todos los tipos
+    document.querySelectorAll('.type').forEach(el => {
+      el.style.pointerEvents = 'auto';
+      el.style.opacity = '1';
+      el.classList.remove('selected');
+    });
 
     // Reiniciar variables de selección
     this.currentPokemon = null;
@@ -750,6 +969,7 @@ class PokemonGame {
 
   updateHistoryDisplay() {
     if (!this.historyListElement) return;
+
 
     this.historyListElement.innerHTML = (this.pokemonHistory || [])
       .map((entry) => {
@@ -767,6 +987,20 @@ class PokemonGame {
             : ""
           }
               <h3>${entry.name || "Pokémon Imaginario"}</h3>
+              <div class="history-abilities">
+                  ${(entry.abilities || []).map(ability => `
+                      <div class="ability">
+                          ${this.capitalize(ability.name)}
+                      </div>
+                  `).join('')}
+              </div>
+              <div class="history-types">
+                  ${(entry.types || []).map(type => `
+                      <div class="type" data-type="${type.name}">
+                          ${this.typeNames[type.name] || this.capitalize(type.name)}
+                      </div>
+                  `).join('')}
+              </div>
               <div class="history-stats">
                   ${Object.entries(entry.stats)
             .filter(
@@ -789,12 +1023,7 @@ class PokemonGame {
             .join("")}
               </div>
               <div class="history-total">
-                  Total: ${entry.total ||
-          Object.values(entry.stats).reduce(
-            (sum, val) => sum + val,
-            0
-          )
-          }
+                  Total: ${entry.total || Object.values(entry.stats).reduce((sum, val) => sum + val, 0)}
               </div>
               <div class="history-date">
                   Creado: ${entry.date || new Date().toLocaleString()}
