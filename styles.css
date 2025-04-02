@@ -119,7 +119,7 @@ h3 {
 
 .pokemon-sprite {
   width: 100px;
-  height: 100px;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -236,22 +236,27 @@ h3 {
   width: 0%;
   background: #ff4444;
 }
+
 .stat-fill[data-value="1"] {
   width: 20%;
   background: #ff6b4a;
 }
+
 .stat-fill[data-value="2"] {
   width: 40%;
   background: #ffa54a;
 }
+
 .stat-fill[data-value="3"] {
   width: 60%;
   background: #ffdd4a;
 }
+
 .stat-fill[data-value="4"] {
   width: 80%;
   background: #a5ff4a;
 }
+
 .stat-fill[data-value="5"] {
   width: 100%;
   background: #4aff56;
@@ -296,8 +301,8 @@ h3 {
 }
 
 .imaginary-sprite {
-  width: 120px;
-  height: 120px;
+  width: 200px;
+  height: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -516,8 +521,8 @@ h3 {
   }
 
   .pokemon-sprite {
-    width: 80px;
-    height: 80px;
+    width: 120px;
+    height: 120px;
   }
 
   .pokemon-name {
@@ -543,7 +548,8 @@ h3 {
   }
 
   .imaginary-sprite {
-    margin: 0 auto;
+    width: 150px;
+    height: 150px;
   }
 
   .origin-sprites {
@@ -652,8 +658,8 @@ h3 {
 }
 
 .modal-sprite {
-  width: 150px;
-  height: 150px;
+  width: 250px;
+  height: 250px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 15px;
   padding: 20px;
@@ -756,8 +762,8 @@ h3 {
   }
 
   .modal-sprite {
-    width: 120px;
-    height: 120px;
+    width: 200px;
+    height: 200px;
     margin: 0 auto;
   }
 

@@ -42,7 +42,7 @@ class PokemonGame {
 
     // Event listeners
     this.selectButton.addEventListener("click", () => this.makeSelection());
-    // this.reloadButton.addEventListener("click", () => this.reloadPokemonData());
+    this.reloadButton.addEventListener("click", () => this.reloadPokemonData());
 
     // Cargar historial desde localStorage
     const savedHistory = localStorage.getItem("pokemonHistory");
@@ -70,7 +70,7 @@ class PokemonGame {
 
       console.log("Cargando datos de Pokémon desde la API...");
       const response = await fetch(
-        "https://pokeapi.co/api/v2/pokemon?limit=151"
+        "https://pokeapi.co/api/v2/pokemon?limit=10000"
       );
       const data = await response.json();
 
@@ -117,7 +117,7 @@ class PokemonGame {
         <button id="retry-load">Reintentar</button>
       `;
       document.querySelector('.game-container').prepend(errorMessage);
-      
+
       // Añadir evento al botón de reintentar
       document.getElementById('retry-load').addEventListener('click', () => {
         errorMessage.remove();
@@ -142,7 +142,7 @@ class PokemonGame {
       this.resetGame();
 
       // Cargar nuevos datos
-      await this.fetchPokemonData();
+      await this.loadPokemonData();
     }
   }
 
@@ -262,6 +262,13 @@ class PokemonGame {
           this.imaginaryPokemon.stats[stat] = value;
           this.imaginaryPokemon.sprites[stat] = pokemon.sprite;
           this.imaginaryPokemon.currentSprite = pokemon.sprite;
+          // Guardar la información de la ronda
+          this.imaginaryPokemon.sources = this.imaginaryPokemon.sources || {};
+          this.imaginaryPokemon.sources[stat] = {
+            name: pokemon.name,
+            sprite: pokemon.sprite,
+            round: this.selectedStats.size
+          };
 
           // Actualizar interfaz
           this.updateImaginaryPokemon();
@@ -354,9 +361,9 @@ class PokemonGame {
 
     const stat =
       this.availableStats[
-        Array.from(this.statsListElement.children).indexOf(
-          this.selectedStatElement
-        )
+      Array.from(this.statsListElement.children).indexOf(
+        this.selectedStatElement
+      )
       ];
 
     // Guardar la selección
@@ -385,21 +392,20 @@ class PokemonGame {
     // Crear el contenedor principal
     let html = `
         <div class="imaginary-main">
-            ${
-              this.imaginaryPokemon.currentSprite
-                ? `
+            ${this.imaginaryPokemon.currentSprite
+        ? `
                 <div class="imaginary-sprite">
                     <img src="${this.imaginaryPokemon.currentSprite}" alt="Pokémon Imaginario" loading="lazy">
                 </div>
             `
-                : ""
-            }
+        : ""
+      }
             <div class="imaginary-stats">
                 ${Object.entries(this.imaginaryPokemon.stats)
-                  .map(([stat, value]) => {
-                    const percentage = (value / 255) * 100;
-                    const hue = percentage * 1.2;
-                    return `
+        .map(([stat, value]) => {
+          const percentage = (value / 255) * 100;
+          const hue = percentage * 1.2;
+          return `
                             <div class="stat-bar">
                                 <div class="stat-label">${this.statNames[stat]}</div>
                                 <div class="stat-progress">
@@ -408,19 +414,18 @@ class PokemonGame {
                                 <div class="stat-value">${value}</div>
                             </div>
                         `;
-                  })
-                  .join("")}
+        })
+        .join("")}
             </div>
         </div>
-        ${
-          Object.keys(this.imaginaryPokemon.stats).length > 0
-            ? `
+        ${Object.keys(this.imaginaryPokemon.stats).length > 0
+        ? `
             <div class="origin-pokemon">
                 <h4>Pokémon de Origen</h4>
                 <div class="origin-sprites">
                     ${Object.entries(this.imaginaryPokemon.sprites)
-                      .map(
-                        ([stat, sprite]) => `
+          .map(
+            ([stat, sprite]) => `
                             <div class="origin-sprite-container">
                                 <div class="origin-sprite">
                                     <img src="${sprite}" alt="Origen ${this.statNames[stat]}">
@@ -428,13 +433,13 @@ class PokemonGame {
                                 <div class="origin-stat">${this.statNames[stat]}</div>
                             </div>
                         `
-                      )
-                      .join("")}
+          )
+          .join("")}
                 </div>
             </div>
         `
-            : ""
-        }
+        : ""
+      }
     `;
 
     this.imaginaryStatsElement.innerHTML = html;
@@ -565,9 +570,12 @@ class PokemonGame {
 
   showFinalResults() {
     const modal = document.getElementById("results-modal");
+    const modalContent = document.querySelector(".modal-content");
     const modalSprite = document.querySelector(".modal-sprite");
-    const modalStats = document.querySelector(".modal-stats");
-    const modalTotal = document.querySelector(".modal-total");
+    const modalBody = document.querySelector(".modal-body");
+
+    // Orden de las estadísticas
+    const statOrder = ["hp", "attack", "defense", "special-attack", "special-defense", "speed"];
 
     // Calcular el total del usuario
     const userTotal = Object.values(this.imaginaryPokemon.stats).reduce(
@@ -608,65 +616,64 @@ class PokemonGame {
 
     this.updateHistoryDisplay();
 
-    // Limpiar estadísticas anteriores
-    if (modalStats) {
-      modalStats.innerHTML = `
-            <div class="results-comparison">
-                <div class="user-results">
-                    <h3>Tu Pokémon</h3>
-                    <div class="stats-container">
-                        ${Object.entries(this.imaginaryPokemon.stats)
-                          .map(([stat, value]) => {
-                            const percentage = (value / 255) * 100;
-                            return `
-                                <div class="stat-bar">
-                                    <div class="stat-name">${this.statNames[stat]}</div>
-                                    <div class="stat-progress">
-                                        <div class="progress-bar" style="width: ${percentage}%"></div>
-                                        <span class="stat-value">${value}</span>
-                                    </div>
+    modalBody.innerHTML = `
+        <div class="results-comparison">
+            <div class="user-results">
+                <h3>Tu Pokémon</h3>
+                <div class="stats-container">
+                    ${statOrder.map(stat => {
+                        const value = this.imaginaryPokemon.stats[stat];
+                        const percentage = (value / 255) * 100;
+                        const source = this.imaginaryPokemon.sources && this.imaginaryPokemon.sources[stat];
+                        return `
+                            <div class="stat-bar">
+                                <div class="stat-name">
+                                    ${this.statNames[stat]}
+                                    ${source ? `
+                                    <span class="stat-source">
+                                        <img src="${source.sprite}" alt="${source.name}" title="${this.capitalize(source.name)} (Ronda ${source.round})">
+                                    </span>
+                                    ` : ''}
                                 </div>
-                            `;
-                          })
-                          .join("")}
-                        <div class="total-value">Total: ${userTotal}</div>
-                    </div>
-                </div>
-                <div class="best-possible">
-                    <h3>Mejor Combinación Posible</h3>
-                    <div class="stats-container">
-                        ${Object.entries(bestPossible.stats)
-                          .map(([stat, value]) => {
-                            const percentage = (value / 255) * 100;
-                            const source = bestPossible.sources[stat];
-                            return `
-                                <div class="stat-bar">
-                                    <div class="stat-name">
-                                        ${this.statNames[stat]}
-                                        <span class="stat-source">
-                                            <img src="${source.sprite}" alt="${
-                              source.name
-                            }" title="${this.capitalize(source.name)} (Ronda ${
-                              source.round
-                            })">
-                                        </span>
-                                    </div>
-                                    <div class="stat-progress">
-                                        <div class="progress-bar" style="width: ${percentage}%"></div>
-                                        <span class="stat-value">${value}</span>
-                                    </div>
+                                <div class="stat-progress">
+                                    <div class="progress-bar" style="width: ${percentage}%"></div>
+                                    <span class="stat-value">${value}</span>
                                 </div>
-                            `;
-                          })
-                          .join("")}
-                        <div class="total-value">Total: ${
-                          bestPossible.total
-                        }</div>
-                    </div>
+                            </div>
+                        `;
+                    }).join("")}
+                    <div class="total-value">Total: ${Object.values(this.imaginaryPokemon.stats).reduce((sum, value) => sum + value, 0)}</div>
                 </div>
             </div>
-        `;
-    }
+            <div class="best-possible">
+                <h3>Mejor Posible</h3>
+                <div class="stats-container">
+                    ${statOrder.map(stat => {
+                        const value = bestPossible.stats[stat];
+                        const percentage = (value / 255) * 100;
+                        const source = bestPossible.sources[stat];
+                        return `
+                            <div class="stat-bar">
+                                <div class="stat-name">
+                                    ${this.statNames[stat]}
+                                    ${source ? `
+                                    <span class="stat-source">
+                                        <img src="${source.sprite}" alt="${source.name}" title="${this.capitalize(source.name)}">
+                                    </span>
+                                    ` : ''}
+                                </div>
+                                <div class="stat-progress">
+                                    <div class="progress-bar" style="width: ${percentage}%"></div>
+                                    <span class="stat-value">${value}</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join("")}
+                    <div class="total-value">Total: ${bestPossible.total}</div>
+                </div>
+            </div>
+        </div>
+    `;
 
     // Mostrar sprite del último Pokémon
     if (modalSprite) {
@@ -676,11 +683,6 @@ class PokemonGame {
       } else {
         modalSprite.innerHTML = '<div class="placeholder-sprite">?</div>';
       }
-    }
-
-    // Mostrar total
-    if (modalTotal) {
-      modalTotal.textContent = `Total: ${userTotal}`;
     }
 
     // Mostrar modal
@@ -759,46 +761,43 @@ class PokemonGame {
 
         return `
           <div class="history-card">
-              ${
-                entry.currentSprite
-                  ? `
+              ${entry.currentSprite
+            ? `
                   <div class="history-sprite">
                       <img src="${entry.currentSprite}" alt="${entry.name}" loading="lazy">
                   </div>
               `
-                  : ""
-              }
+            : ""
+          }
               <h3>${entry.name || "Pokémon Imaginario"}</h3>
               <div class="history-stats">
                   ${Object.entries(entry.stats)
-                    .filter(
-                      ([stat, value]) =>
-                        stat && value !== undefined && entry.sprites[stat]
-                    )
-                    .map(
-                      ([stat, value]) => `
+            .filter(
+              ([stat, value]) =>
+                stat && value !== undefined && entry.sprites[stat]
+            )
+            .map(
+              ([stat, value]) => `
                           <div class="history-stat">
-                              ${
-                                entry.sprites[stat]
-                                  ? `
+                              ${entry.sprites[stat]
+                  ? `
                                   <img src="${entry.sprites[stat]}" alt="" class="stat-origin-sprite">
                               `
-                                  : ""
-                              }
+                  : ""
+                }
                               ${this.statNames[stat] || stat}: ${value}
                           </div>
                       `
-                    )
-                    .join("")}
+            )
+            .join("")}
               </div>
               <div class="history-total">
-                  Total: ${
-                    entry.total ||
-                    Object.values(entry.stats).reduce(
-                      (sum, val) => sum + val,
-                      0
-                    )
-                  }
+                  Total: ${entry.total ||
+          Object.values(entry.stats).reduce(
+            (sum, val) => sum + val,
+            0
+          )
+          }
               </div>
               <div class="history-date">
                   Creado: ${entry.date || new Date().toLocaleString()}
