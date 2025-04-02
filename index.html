@@ -1,58 +1,61 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mejor Pokémon</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <div class="container">
-      <h1>Mejor Pokémon</h1>
 
-      <div class="game-container">
-        <div class="round-info">
-          <h2>Ronda <span id="round-number">1</span></h2>
-        </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mejor Pokémon</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
 
-        <div class="pokemon-section">
-          <h3>Pokémon Disponibles</h3>
-          <div id="pokemon-list" class="pokemon-grid"></div>
-        </div>
+<body>
+  <div class="container">
+    <h1>Mejor Pokémon</h1>
 
-        <div class="imaginary-pokemon">
-          <h3>Tu Pokémon Imaginario</h3>
-          <div id="imaginary-stats"></div>
-          <div class="total-stats">
-            Total: <span id="total-stats">0</span>
-          </div>
-        </div>
+    <div class="game-container">
+      <div class="round-info">
+        <h2>Ronda <span id="round-number">1</span></h2>
       </div>
 
-      <div class="controls">
-        <button id="reload-button" class="reload-button">Reiniciar Juego</button>
+      <div class="pokemon-section">
+        <h3>Pokémon Disponibles</h3>
+        <div id="pokemon-list" class="pokemon-grid"></div>
       </div>
-    </div>
 
-    <!-- Modal de Resultados -->
-    <div id="results-modal" class="modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>¡Juego Terminado!</h2>
-          <button class="close-modal">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div class="modal-pokemon-info">
-            <div class="modal-sprite"></div>
-            <div class="modal-stats"></div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="modal-button" id="play-again">Jugar de Nuevo</button>
+      <div class="imaginary-pokemon">
+        <h3>Tu Pokémon Imaginario</h3>
+        <div id="imaginary-stats"></div>
+        <div class="total-stats">
+          Total: <span id="total-stats">0</span>
         </div>
       </div>
     </div>
 
-    <script src="game.js" defer></script>
-  </body>
+    <div class="controls">
+      <button id="reload-button" class="reload-button">Reiniciar Juego</button>
+    </div>
+  </div>
+
+  <!-- Modal de Resultados -->
+  <div id="results-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>¡Juego Terminado!</h2>
+        <button class="close-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-pokemon-info">
+          <div class="modal-sprite"></div>
+          <div class="modal-stats"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-button" id="play-again">Jugar de Nuevo</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js" defer></script>
+</body>
+
 </html>

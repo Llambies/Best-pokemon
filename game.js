@@ -39,8 +39,7 @@ class PokemonGame {
     this.reloadButton = document.getElementById("reload-button");
     this.historyListElement = document.getElementById("history-list");
 
-    // Event listeners
-    //this.reloadButton.addEventListener("click", () => this.reloadPokemonData());
+
 
     // Cargar historial desde localStorage
     const savedHistory = localStorage.getItem("pokemonHistory");
