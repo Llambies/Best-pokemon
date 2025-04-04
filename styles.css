@@ -119,13 +119,14 @@ h1 {
 }
 
 .pokemon-card {
-  background: rgba(30, 30, 30, 0.95);
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
-  padding: 15px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  height: fit-content;
+  height: 100%;
+  transition: transform 0.2s ease;
 }
 
 .pokemon-card:hover {
@@ -139,15 +140,15 @@ h1 {
 }
 
 .pokemon-sprite {
-  width: 80px;
-  height: 80px;
+  width: 100%;
+  height: 100px;
+  min-height: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(20, 20, 20, 0.95);
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
   padding: 8px;
-  margin: 0 auto;
 }
 
 .pokemon-sprite img {
@@ -165,22 +166,22 @@ h1 {
 }
 
 .pokemon-name {
-  font-size: 1.1em;
+  font-size: 1.2em;
   font-weight: bold;
   color: #ffd700;
+  margin-bottom: 5px;
   text-align: center;
-  margin: 5px 0;
 }
 
 .pokemon-stats {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin-top: 5px;
+  font-size: 0.85em;
 }
 
 .pokemon-types {
-  margin: 5px 0;
+  margin: 2px 0;
   text-align: center;
 }
 
@@ -191,10 +192,12 @@ h1 {
 
 .type {
   display: inline-block;
-  padding: 3px 12px;
-  margin: 2px;
-  border-radius: 12px;
-  font-size: 0.85em;
+  padding: 6px 12px;
+  margin: 3px;
+  border-radius: 15px;
+  font-size: 0.95em;
+  cursor: pointer;
+  transition: all 0.2s ease;
   color: white;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
 }
@@ -224,17 +227,6 @@ h1 {
 .type[data-type="steel"] { background-color: #B8B8D0; }
 .type[data-type="fairy"] { background-color: #EE99AC; }
 
-/* Colores específicos para los tipos en español */
-.type[data-type="psiquico"] { background-color: #F85888; }
-.type[data-type="tierra"] { background-color: #E0C068; }
-.type[data-type="volador"] { background-color: #A890F0; }
-.type[data-type="normal"] { background-color: #A8A878; }
-.type[data-type="fantasma"] { background-color: #705898; }
-.type[data-type="bicho"] { background-color: #A8B820; }
-.type[data-type="planta"] { background-color: #78C850; }
-.type[data-type="roca"] { background-color: #B8A038; }
-.type[data-type="lucha"] { background-color: #C03028; }
-
 .pokemon-abilities {
   margin: 5px 0;
   text-align: center;
@@ -247,12 +239,15 @@ h1 {
 
 .ability {
   display: inline-block;
-  padding: 3px 10px;
-  margin: 2px;
-  background: rgba(60, 60, 60, 0.95);
+  padding: 5px 10px;
+  margin: 3px;
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  font-size: 0.85em;
+  font-size: 0.9em;
   color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .ability:hover {
@@ -269,9 +264,10 @@ h1 {
 .stat-bar {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 2px;
-  height: 20px;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .stat-bar.disabled {
@@ -314,31 +310,31 @@ h1 {
 .stat-label {
   min-width: 35px;
   color: #fff;
-  font-size: 0.85em;
-  font-weight: normal;
+  font-size: 0.9em;
+  font-weight: bold;
 }
 
 .stat-progress {
   flex-grow: 1;
   height: 8px;
-  background: rgba(20, 20, 20, 0.95);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   overflow: hidden;
-  position: relative;
-}
-
-.stat-fill {
-  height: 100%;
-  background: linear-gradient(to right, #ffa600, #ffd700);
-  border-radius: 4px;
 }
 
 .stat-value {
   min-width: 30px;
   text-align: right;
   color: #ffd700;
-  font-size: 0.85em;
-  font-weight: normal;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+.stat-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  width: 0;
 }
 
 /* Colores para las barras de estadísticas basados en el valor */
