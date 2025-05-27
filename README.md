@@ -31,7 +31,7 @@ Un juego web interactivo que te permite crear tu propio Pokémon imaginario sele
 
 ## Enlace al juego
 
-[Jugar ahora](https://adrmallla.github.io/best-pokemon/)
+[Jugar ahora](https://llambies.github.io/Best-pokemon/)
 
 ## Licencia
 
